@@ -4,39 +4,62 @@ class BusStop:
         self.name = name
         self.coordinates = coordinates
         self.time_to_next = time_to_next
+
         self.next = None
+        self.prev = None
 
 
 class BusRoute:
 
     def __init__(self):
         self.head = None
+        self.tail = None
         self.circular = False
 
     # Добавление остановки
     def add_stop(self, name, coordinates, time_to_next):
+
         new_stop = BusStop(name, coordinates, time_to_next)
 
         if self.head is None:
             self.head = new_stop
+            self.tail = new_stop
 
             if self.circular:
-                new_stop.next = self.head
+                self.head.next = self.head
+                self.head.prev = self.head
 
             return
 
-        current = self.head
-
-        while current.next and current.next != self.head:
-            current = current.next
-
-        current.next = new_stop
+        new_stop.prev = self.tail
+        self.tail.next = new_stop
+        self.tail = new_stop
 
         if self.circular:
-            new_stop.next = self.head
+            self.tail.next = self.head
+            self.head.prev = self.tail
+
+    # Удаление последней остановки
+    def remove_last_stop(self):
+
+        if self.head is None:
+            return
+
+        if self.head == self.tail:
+            self.head = None
+            self.tail = None
+            return
+
+        self.tail = self.tail.prev
+        self.tail.next = None
+
+        if self.circular:
+            self.tail.next = self.head
+            self.head.prev = self.tail
 
     # Подсчет общего времени маршрута
     def total_route_time(self):
+
         if self.head is None:
             return 0
 
@@ -44,8 +67,8 @@ class BusRoute:
         current = self.head
 
         while True:
-            total += current.time_to_next
 
+            total += current.time_to_next
             current = current.next
 
             if current is None or current == self.head:
@@ -55,12 +78,14 @@ class BusRoute:
 
     # Где будет автобус через N остановок
     def get_stop_after_n(self, n):
+
         if self.head is None:
             return "Маршрут пуст"
 
         current = self.head
 
         for _ in range(n):
+
             if current.next is None:
                 return "Маршрут закончился"
 
@@ -70,51 +95,43 @@ class BusRoute:
 
     # Построение обратного маршрута
     def reverse_route(self):
+
         if self.head is None:
             return
 
-        prev = None
         current = self.head
-
-        if self.circular:
-            tail = self.head
-
-            while tail.next != self.head:
-                tail = tail.next
-
-            tail.next = None
+        self.head, self.tail = self.tail, self.head
 
         while current:
-            next_node = current.next
-            current.next = prev
-            prev = current
-            current = next_node
 
-        self.head = prev
+            current.next, current.prev = (
+                current.prev,
+                current.next
+            )
+
+            current = current.prev
+
+            if self.circular and current == self.head:
+                break
 
         if self.circular:
-            tail = self.head
+            self.tail.next = self.head
+            self.head.prev = self.tail
 
-            while tail.next:
-                tail = tail.next
-
-            tail.next = self.head
-
-    # Создание кольцевого маршрута
+    # Реализация кольцевого маршрута
     def make_circular(self):
+
         if self.head is None:
             return
 
-        current = self.head
-
-        while current.next:
-            current = current.next
-
-        current.next = self.head
         self.circular = True
+
+        self.tail.next = self.head
+        self.head.prev = self.tail
 
     # Подробный отчет
     def generate_report(self, filename):
+
         with open(filename, "w", encoding="utf-8") as file:
 
             if self.head is None:
@@ -128,13 +145,17 @@ class BusRoute:
             stop_number = 1
 
             while True:
+
                 file.write(f"Остановка #{stop_number}\n")
                 file.write(f"Название: {current.name}\n")
-                file.write(f"Координаты: {current.coordinates}\n")
+                file.write(
+                    f"Координаты: {current.coordinates}\n"
+                )
                 file.write(
                     f"Время до следующей: "
                     f"{current.time_to_next} мин\n"
                 )
+
                 file.write("-" * 40 + "\n")
 
                 current = current.next
@@ -149,12 +170,17 @@ class BusRoute:
             )
 
             if self.circular:
-                file.write("Маршрут является кольцевым\n")
+                file.write(
+                    "Маршрут является кольцевым\n"
+                )
             else:
-                file.write("Маршрут НЕ является кольцевым\n")
+                file.write(
+                    "Маршрут не является кольцевым\n"
+                )
 
     # Вывод маршрута
     def print_route(self):
+
         if self.head is None:
             print("Маршрут пуст")
             return
@@ -162,6 +188,7 @@ class BusRoute:
         current = self.head
 
         while True:
+
             print(
                 f"{current.name} "
                 f"{current.coordinates} "
@@ -191,6 +218,12 @@ print(route.get_stop_after_n(2))
 
 print("\nСоздаем кольцевой маршрут...")
 route.make_circular()
+
+print("\nУдаляем последнюю остановку...")
+route.remove_last_stop()
+
+print("\nМаршрут после удаления:")
+route.print_route()
 
 print("\nРазворачиваем маршрут...")
 route.reverse_route()
