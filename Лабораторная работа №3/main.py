@@ -1,81 +1,67 @@
 class Task:
-
     def __init__(self, task_id, description, priority):
         self.id = task_id
         self.description = description
         self.priority = priority
 
     def __str__(self):
-        return f"[ID: {self.id}] {self.description} | Приоритет: {self.priority}"
+        return f"ID: {self.id}, Описание: {self.description}, Приоритет: {self.priority}"
 
 
-class TaskQueue:
-
+class Queue:
     def __init__(self):
-        self.queue = []
+        self.items = []
 
-    # Добавление задачи
     def enqueue(self, task):
-
-        for existing_task in self.queue:
+        for existing_task in self.items:
             if existing_task.id == task.id:
-                print(f"Ошибка: задача с id = {task.id} уже существует!")
+                print(f"Ошибка: задача с id {task.id} уже существует")
                 return
 
-        self.queue.append(task)
-        print("Задача добавлена.")
+        self.items.append(task)
 
-    # Удаление задачи
     def dequeue(self):
-
-        if self.isEmpty():
-            print("Очередь пуста.")
+        if self.is_empty():
+            print("Очередь пуста")
             return None
+        return self.items.pop(0)
 
-        return self.queue.pop(0)
-
-    # Первая задача
     def front(self):
-
-        if self.isEmpty():
-            print("Очередь пуста.")
+        if self.is_empty():
+            print("Очередь пуста")
             return None
+        return self.items[0]
 
-        return self.queue[0]
+    def is_empty(self):
+        return len(self.items) == 0
 
-    # Проверка очереди
-    def isEmpty(self):
-        return len(self.queue) == 0
+    def size(self):
+        return len(self.items)
 
-    # Вывод задач
-    def show_tasks(self):
-
-        if self.isEmpty():
-            print("Очередь пуста.")
+    def show(self):
+        if self.is_empty():
+            print("Очередь пуста")
             return
 
-        print("\nСписок задач:")
-
-        for task in self.queue:
+        for task in self.items:
             print(task)
 
 
-task_queue = TaskQueue()
+# Пример использования
+queue = Queue()
 
-task1 = Task(1, "Сделать лабораторную работу", 1)
-task2 = Task(2, "Подготовить отчет", 2)
-task3 = Task(1, "Повторяющийся id", 3)
+queue.enqueue(Task(1, "Сделать лабораторную", 1))
+queue.enqueue(Task(2, "Подготовить отчет", 2))
+queue.enqueue(Task(1, "Повторяющийся id", 3))
 
-task_queue.enqueue(task1)
-task_queue.enqueue(task2)
-task_queue.enqueue(task3)
+print("Первая задача:")
+print(queue.front())
 
-task_queue.show_tasks()
+print("\nВсе задачи:")
+queue.show()
 
-print("\nПервая задача:")
-print(task_queue.front())
+print("\nУдалена задача:")
+print(queue.dequeue())
 
-print("\nУдаленная задача:")
-print(task_queue.dequeue())
-
-task_queue.show_tasks()
+print("\nКоличество задач:")
+print(queue.size())
