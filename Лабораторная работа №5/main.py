@@ -28,16 +28,21 @@ def search(root, target):
 
     if target < root.value:
         return search(root.left, target)
+    else:
+        return search(root.right, target)
 
-    return search(root.right, target)
 
-
-def inorder(root):
+def inorder(root, result=None):
     """Симметричный обход дерева"""
+    if result is None:
+        result = []
+
     if root:
-        inorder(root.left)
-        print(root.value, end=" ")
-        inorder(root.right)
+        inorder(root.left, result)
+        result.append(root.value)
+        inorder(root.right, result)
+    
+    return result
 
 
 def count_leaves(root):
@@ -52,7 +57,6 @@ def count_leaves(root):
 
 
 # Пример работы программы
-
 root = None
 
 values = [50, 30, 70, 20, 40, 60, 80]
@@ -61,7 +65,7 @@ for value in values:
     root = insert(root, value)
 
 print("Элементы дерева по возрастанию:")
-inorder(root)
+print(*inorder(root))
 
 print("\n")
 
